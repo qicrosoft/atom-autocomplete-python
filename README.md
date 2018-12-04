@@ -1,3 +1,6 @@
+# What's changed?
+* Fix the bug: sometimes the python process keeps running when Atom has exited.
+
 # Python Autocomplete Jedi Package [![Build Status](https://travis-ci.org/brennv/autocomplete-python-jedi.svg?branch=master)](https://travis-ci.org/brennv/autocomplete-python-jedi)
 
 Python packages, variables, methods and functions with their arguments autocompletion in [Atom](http://atom.io) powered by [Jedi](https://jedi.readthedocs.io/en/latest/).

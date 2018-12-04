@@ -1,6 +1,6 @@
 module.exports =
   priority: 1
-  providerName: 'autocomplete-python-jedi'
+  providerName: 'atom-autocomplete-python'
   disableForSelector: '.source.python .comment, .source.python .string, .source.python .numeric, .source.python .integer, .source.python .decimal, .source.python .punctuation, .source.python .keyword, .source.python .storage, .source.python .variable.parameter, .source.python .entity.name'
   constructed: false
 
@@ -29,7 +29,7 @@ module.exports =
       if @selectorsMatchScopeChain(disableForSelector, scopeChain)
         return
 
-      if atom.config.get('autocomplete-python-jedi.outputDebug')
+      if atom.config.get('atom-autocomplete-python.outputDebug')
         @log.debug range.start, @_getScopes(editor, range.start)
         @log.debug range.end, @_getScopes(editor, range.end)
       callback = =>

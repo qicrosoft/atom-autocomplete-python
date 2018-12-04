@@ -4,7 +4,7 @@ module.exports =
   selector: '.source.python'
   disableForSelector: '.source.python .comment, .source.python .string'
   inclusionPriority: 2
-  suggestionPriority: atom.config.get('autocomplete-python-jedi.suggestionPriority')
+  suggestionPriority: atom.config.get('atom-autocomplete-python.suggestionPriority')
   excludeLowerPriority: false
   cacheSize: 10
 
@@ -21,13 +21,13 @@ module.exports =
       return
     log.warning 'No python executable found', error
     atom.notifications.addWarning(
-      'autocomplete-python-jedi unable to find python binary.', {
+      'atom-autocomplete-python unable to find python binary.', {
       detail: """Please set path to python executable manually in package
       settings and restart your editor. Be sure to migrate on new settings
       if everything worked on previous version.
       Detailed error message: #{error}
 
-      Current config: #{atom.config.get('autocomplete-python-jedi.pythonPaths')}"""
+      Current config: #{atom.config.get('atom-autocomplete-python.pythonPaths')}"""
       dismissable: true})
     @providerNoExecutable = true
 
@@ -42,19 +42,19 @@ module.exports =
       stderr: (data) =>
         if data.indexOf('is not recognized as an internal or external') > -1
           return @_noExecutableError(data)
-        log.debug "autocomplete-python-jedi traceback output: #{data}"
+        log.debug "atom-autocomplete-python traceback output: #{data}"
         if data.indexOf('jedi') > -1
-          if atom.config.get('autocomplete-python-jedi.outputProviderErrors')
+          if atom.config.get('atom-autocomplete-python.outputProviderErrors')
             atom.notifications.addWarning(
               '''Looks like this error originated from Jedi. Please report this 
-              issue to autocomplete-python-jedi so we can help improve Jedi. 
+              issue to atom-autocomplete-python so we can help improve Jedi. 
               Turn off the `outputProviderErrors` setting to hide such errors 
               in future. Traceback output:''', {
               detail: "#{data}",
               dismissable: true})
         else
           atom.notifications.addError(
-            'autocomplete-python-jedi traceback output:', {
+            'atom-autocomplete-python traceback output:', {
               detail: "#{data}",
               dismissable: true})
 
@@ -112,29 +112,29 @@ module.exports =
     @constructed = true
     @snippetsManager = null
 
-    log.debug "Init autocomplete-python-jedi with priority #{@suggestionPriority}"
+    log.debug "Init atom-autocomplete-python with priority #{@suggestionPriority}"
 
     try
       @triggerCompletionRegex = RegExp atom.config.get(
-        'autocomplete-python-jedi.triggerCompletionRegex')
+        'atom-autocomplete-python.triggerCompletionRegex')
     catch err
       atom.notifications.addWarning(
-        '''autocomplete-python-jedi invalid regexp to trigger autocompletions.
+        '''atom-autocomplete-python invalid regexp to trigger autocompletions.
         Falling back to default value.''', {
         detail: "Original exception: #{err}"
         dismissable: true})
-      atom.config.set('autocomplete-python-jedi.triggerCompletionRegex',
+      atom.config.set('atom-autocomplete-python.triggerCompletionRegex',
                       '([\.\ ]|[a-zA-Z_][a-zA-Z0-9_]*)')
       @triggerCompletionRegex = /([\.\ ]|[a-zA-Z_][a-zA-Z0-9_]*)/
 
     selector = 'atom-text-editor[data-grammar~=python]'
-    atom.commands.add selector, 'autocomplete-python-jedi:go-to-definition', =>
+    atom.commands.add selector, 'atom-autocomplete-python:go-to-definition', =>
       @goToDefinition()
-    atom.commands.add selector, 'autocomplete-python-jedi:complete-arguments', =>
+    atom.commands.add selector, 'atom-autocomplete-python:complete-arguments', =>
       editor = atom.workspace.getActiveTextEditor()
       @_completeArguments(editor, editor.getCursorBufferPosition(), true)
 
-    atom.commands.add selector, 'autocomplete-python-jedi:show-usages', =>
+    atom.commands.add selector, 'atom-autocomplete-python:show-usages', =>
       editor = atom.workspace.getActiveTextEditor()
       bufferPosition = editor.getCursorBufferPosition()
       if @usagesView
@@ -143,7 +143,7 @@ module.exports =
       @getUsages(editor, bufferPosition).then (usages) =>
         @usagesView.setItems(usages)
 
-    atom.commands.add selector, 'autocomplete-python-jedi:override-method', =>
+    atom.commands.add selector, 'atom-autocomplete-python:override-method', =>
       editor = atom.workspace.getActiveTextEditor()
       bufferPosition = editor.getCursorBufferPosition()
       if @overrideView
@@ -154,7 +154,7 @@ module.exports =
         @overrideView.bufferPosition = bufferPosition
         @overrideView.setItems(methods)
 
-    atom.commands.add selector, 'autocomplete-python-jedi:rename', =>
+    atom.commands.add selector, 'atom-autocomplete-python:rename', =>
       editor = atom.workspace.getActiveTextEditor()
       bufferPosition = editor.getCursorBufferPosition()
       @getUsages(editor, bufferPosition).then (usages) =>
@@ -206,7 +206,7 @@ module.exports =
     eventId = "#{editor.id}.#{eventName}"
     if grammar.scopeName == 'source.python'
 
-      if atom.config.get('autocomplete-python-jedi.showTooltips') is true
+      if atom.config.get('atom-autocomplete-python.showTooltips') is true
         editor.onDidChangeCursorPosition (event) =>
           @_showSignatureOverlay(event, @)
 
@@ -248,7 +248,7 @@ module.exports =
           log.debug 'Attempt to communicate with terminated process', @provider
       else if respawned
         atom.notifications.addWarning(
-          ["Failed to spawn daemon for autocomplete-python-jedi."
+          ["Failed to spawn daemon for atom-autocomplete-python."
            "Completions will not work anymore"
            "unless you restart your editor."].join(' '), {
           detail: ["exitCode: #{process.exitCode}"
@@ -307,21 +307,21 @@ module.exports =
 
   _generateRequestConfig: ->
     extraPaths = @InterpreterLookup.applySubstitutions(
-      atom.config.get('autocomplete-python-jedi.extraPaths').split(';'))
+      atom.config.get('atom-autocomplete-python.extraPaths').split(';'))
     args =
       'extraPaths': extraPaths
-      'useSnippets': atom.config.get('autocomplete-python-jedi.useSnippets')
+      'useSnippets': atom.config.get('atom-autocomplete-python.useSnippets')
       'caseInsensitiveCompletion': atom.config.get(
-        'autocomplete-python-jedi.caseInsensitiveCompletion')
+        'atom-autocomplete-python.caseInsensitiveCompletion')
       'showDescriptions': atom.config.get(
-        'autocomplete-python-jedi.showDescriptions')
-      'fuzzyMatcher': atom.config.get('autocomplete-python-jedi.fuzzyMatcher')
+        'atom-autocomplete-python.showDescriptions')
+      'fuzzyMatcher': atom.config.get('atom-autocomplete-python.fuzzyMatcher')
     return args
 
   setSnippetsManager: (@snippetsManager) ->
 
   _completeArguments: (editor, bufferPosition, force) ->
-    useSnippets = atom.config.get('autocomplete-python-jedi.useSnippets')
+    useSnippets = atom.config.get('atom-autocomplete-python.useSnippets')
     if not force and useSnippets == 'none'
       atom.commands.dispatch(document.querySelector('atom-text-editor'),
                              'autocomplete-plus:activate')
@@ -371,7 +371,7 @@ module.exports =
       row: bufferPosition.row
       column: bufferPosition.column
     lines = editor.getBuffer().getLines()
-    if atom.config.get('autocomplete-python-jedi.fuzzyMatcher')
+    if atom.config.get('atom-autocomplete-python.fuzzyMatcher')
       # we want to do our own filtering, hide any existing suffix from Jedi
       line = lines[bufferPosition.row]
       lastIdentifier = /\.?[a-zA-Z_][a-zA-Z0-9_]*$/.exec(
@@ -385,7 +385,7 @@ module.exports =
       log.debug 'Using cached response with ID', requestId
       # We have to parse JSON on each request here to pass only a copy
       matches = JSON.parse(@responses[requestId]['source'])['results']
-      if atom.config.get('autocomplete-python-jedi.fuzzyMatcher')
+      if atom.config.get('atom-autocomplete-python.fuzzyMatcher')
         return @lastSuggestions = @_fuzzyFilter(matches, prefix)
       else
         return @lastSuggestions = matches
@@ -401,7 +401,7 @@ module.exports =
 
     @_sendRequest(@_serialize(payload))
     return new Promise (resolve) =>
-      if atom.config.get('autocomplete-python-jedi.fuzzyMatcher')
+      if atom.config.get('atom-autocomplete-python.fuzzyMatcher')
         @requests[payload.id] = (matches) =>
           resolve(@lastSuggestions = @_fuzzyFilter(matches, prefix))
       else

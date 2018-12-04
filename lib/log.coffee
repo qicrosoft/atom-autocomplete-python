@@ -1,7 +1,7 @@
 module.exports =
-  prefix: 'autocomplete-python-jedi:'
+  prefix: 'atom-autocomplete-python:'
   debug: (msg...) ->
-    if atom.config.get('autocomplete-python-jedi.outputDebug')
+    if atom.config.get('atom-autocomplete-python.outputDebug')
       return console.debug @prefix, msg...
 
   warning: (msg...) ->
